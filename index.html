@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>RUNJAWN</title>
+<style>
+:root {
+  --bg:    #07070D;
+  --bg1:   #0C0C18;
+  --bg2:   #111122;
+  --bg3:   #181830;
+  --sep:   rgba(255,255,255,0.07);
+  --sep2:  rgba(255,255,255,0.12);
+  --orange:#E8460A;
+  --oran2: rgba(232,70,10,0.18);
+  --oran3: rgba(232,70,10,0.08);
+  --gold:  #D4A843;
+  --gold2: rgba(212,168,67,0.15);
+  --blue:  #3B82F6;
+  --blue2: rgba(59,130,246,0.15);
+  --green: #22C55E;
+  --grn2:  rgba(34,197,94,0.15);
+  --purp:  #A855F7;
+  --purp2: rgba(168,85,247,0.15);
+  --red:   #EF4444;
+  --red2:  rgba(239,68,68,0.15);
+  --txt:   #EEEEF8;
+  --txt2:  #7A7A94;
+  --txt3:  #3A3A54;
+  --sat:   env(safe-area-inset-top,0px);
+  --sab:   env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;}
+
+/* NAV */
+#hdr{position:sticky;top:0;z-index:100;background:rgba(7,7,13,0.92);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-bottom:1px solid var(--sep);padding:calc(12px + var(--sat)) 20px 0;}
+.hdr-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:12px;}
+.brand{display:flex;flex-direction:column;gap:2px;}
+.brand-eye{font-size:9px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--orange);}
+.brand-name{font-size:24px;font-weight:900;letter-spacing:-1px;line-height:1;}
+.brand-sub{font-size:11px;color:var(--txt2);letter-spacing:.3px;}
+.hdr-stats{display:flex;gap:20px;align-items:flex-start;}
+.hstat{text-align:right;}
+.hstat-v{font-size:20px;font-weight:800;letter-spacing:-0.5px;font-variant-numeric:tabular-nums;}
+.hstat-l{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-top:1px;}
+.hstat-v.orange{color:var(--orange);}
+.hstat-v.gold{color:var(--gold);}
+
+/* TAB NAV */
+.tabs{display:flex;gap:0;border-bottom:none;margin:0 -20px;}
+.tab{flex:1;padding:10px 0 12px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:none;border:none;color:var(--txt3);cursor:pointer;font-family:inherit;position:relative;transition:color .15s;}
+.tab.active{color:var(--orange);}
+.tab.active::after{content:'';position:absolute;bottom:0;left:15%;right:15%;height:2px;background:var(--orange);border-radius:1px;}
+
+/* MAIN */
+#main{padding:0 0 80px;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* SECTION */
+.section{padding:20px;}
+.section+.section{padding-top:0;}
+
+/* CARDS */
+.card{background:var(--bg1);border:1px solid var(--sep);border-radius:16px;overflow:hidden;}
+.card+.card{margin-top:12px;}
+.card-hd{padding:14px 16px 12px;border-bottom:1px solid var(--sep);display:flex;justify-content:space-between;align-items:center;}
+.card-title{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--txt2);}
+.card-body{padding:16px;}
+
+/* PROGRESS CHART */
+.prog-wrap{padding:20px 20px 8px;}
+.prog-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px;}
+.prog-goal{display:flex;flex-direction:column;gap:2px;}
+.prog-label{font-size:9px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:var(--txt3);}
+.prog-time{font-size:32px;font-weight:900;letter-spacing:-1.5px;font-variant-numeric:tabular-nums;}
+.prog-time.goal{color:var(--orange);}
+.prog-time.pred{color:var(--gold);}
+.prog-delta{font-size:12px;font-weight:700;color:var(--txt2);margin-top:2px;}
+.prog-delta span{color:var(--red);}
+.prog-delta span.good{color:var(--green);}
+canvas#progChart{width:100%;height:160px;display:block;margin:0 -4px;}
+
+/* THIS WEEK STRIP */
+.week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:16px;}
+.ws-day{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border-radius:10px;cursor:pointer;transition:background .15s;border:1px solid transparent;}
+.ws-day:hover{background:var(--bg2);}
+.ws-day.today{background:var(--bg2);border-color:var(--orange);}
+.ws-day.done{opacity:.55;}
+.ws-dn{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);}
+.ws-dot{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.ws-mi{font-size:9px;font-weight:700;color:var(--txt2);font-variant-numeric:tabular-nums;}
+.ws-day.today .ws-dn{color:var(--orange);}
+
+/* RUN TYPE DOTS */
+.dot-easy{background:var(--grn2);color:var(--green);}
+.dot-long{background:var(--gold2);color:var(--gold);}
+.dot-tempo{background:var(--oran2);color:var(--orange);}
+.dot-fartlek{background:var(--purp2);color:var(--purp);}
+.dot-interval{background:var(--red2);color:var(--red);}
+.dot-gym{background:var(--blue2);color:var(--blue);}
+.dot-rest{background:rgba(255,255,255,0.05);color:var(--txt3);}
+.dot-race{background:var(--orange);color:#fff;box-shadow:0 0 12px rgba(232,70,10,0.6);}
+.dot-done{background:rgba(34,197,94,0.08);color:rgba(34,197,94,0.4);}
+
+/* CALENDAR */
+.cal-phase{padding:20px 20px 8px;display:flex;align-items:center;gap:10px;}
+.phase-badge{font-size:9px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:var(--orange);background:var(--oran3);border:1px solid var(--oran2);padding:4px 10px;border-radius:4px;}
+.phase-name{font-size:13px;font-weight:700;color:var(--txt2);}
+
+.week-row{margin:0 20px 8px;background:var(--bg1);border:1px solid var(--sep);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .15s;}
+.week-row:hover{border-color:var(--sep2);}
+.week-row.current-week{border-color:rgba(232,70,10,0.4);}
+.week-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;}
+.week-num{font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--orange);}
+.week-miles{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;}
+.week-miles span{font-size:10px;color:var(--txt2);margin-left:2px;}
+.week-deload{font-size:9px;background:var(--gold2);color:var(--gold);border-radius:3px;padding:2px 6px;font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+.week-days{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:0 10px 12px;}
+.wd{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:8px;cursor:pointer;transition:background .15s;border:1px solid transparent;}
+.wd:hover{background:var(--bg2);}
+.wd.logged{opacity:.6;}
+.wd-name{font-size:8px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--txt3);}
+.wd-dot{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;}
+.wd-mi{font-size:8px;font-weight:700;color:var(--txt2);}
+.wd.today-cal .wd-name{color:var(--orange);}
+.wd.today-cal{border-color:rgba(232,70,10,0.35);}
+
+/* MODAL */
+#modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+#modal-overlay.open{display:flex;align-items:flex-end;justify-content:center;}
+#modal{background:var(--bg1);border-radius:24px 24px 0 0;border:1px solid var(--sep);width:100%;max-width:600px;max-height:92vh;overflow-y:auto;padding-bottom:calc(20px + var(--sab));}
+.modal-handle{width:36px;height:4px;background:var(--txt3);border-radius:2px;margin:12px auto 8px;}
+.modal-hd{padding:8px 20px 16px;border-bottom:1px solid var(--sep);display:flex;justify-content:space-between;align-items:flex-start;}
+.modal-title{font-size:18px;font-weight:800;letter-spacing:-.5px;}
+.modal-sub{font-size:11px;color:var(--txt2);margin-top:3px;}
+.modal-close{background:var(--bg2);border:1px solid var(--sep);color:var(--txt2);width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;flex-shrink:0;}
+.modal-body{padding:20px;}
+
+/* FORM */
+.form-section{margin-bottom:22px;}
+.form-label{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--txt2);margin-bottom:8px;display:block;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-row.three{grid-template-columns:1fr 1fr 1fr;}
+.finput{background:var(--bg2);border:1px solid var(--sep2);border-radius:10px;padding:12px 14px;font-size:15px;font-weight:600;color:var(--txt);font-family:inherit;width:100%;outline:none;font-variant-numeric:tabular-nums;}
+.finput:focus{border-color:var(--orange);}
+.finput::placeholder{color:var(--txt3);}
+select.finput{-webkit-appearance:none;appearance:none;cursor:pointer;}
+.fgroup{display:flex;flex-direction:column;gap:6px;}
+.fgroup label.form-label{margin-bottom:0;}
+
+/* RPE SLIDER */
+.rpe-row{display:flex;gap:6px;flex-wrap:wrap;}
+.rpe-btn{width:36px;height:36px;border-radius:8px;background:var(--bg2);border:1px solid var(--sep);font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;color:var(--txt2);transition:all .12s;}
+.rpe-btn.sel{background:var(--orange);border-color:var(--orange);color:#fff;}
+.rpe-btn:hover:not(.sel){background:var(--bg3);}
+
+/* PAIN AREA */
+.pain-areas{display:flex;gap:6px;flex-wrap:wrap;}
+.pa-btn{padding:6px 12px;border-radius:8px;background:var(--bg2);border:1px solid var(--sep);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--txt2);transition:all .12s;}
+.pa-btn.sel{background:var(--red2);border-color:var(--red);color:var(--red);}
+.pain-scale{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px;}
+.ps-btn{width:34px;height:34px;border-radius:8px;background:var(--bg2);border:1px solid var(--sep);font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;color:var(--txt2);transition:all .12s;}
+.ps-btn.sel{color:#fff;}
+
+/* PAIN RECS */
+.pain-recs{background:var(--red2);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:14px;margin-top:14px;}
+.pain-recs-title{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:10px;}
+.pain-rec-item{font-size:13px;color:var(--txt);margin-bottom:6px;padding-left:14px;position:relative;}
+.pain-rec-item::before{content:'›';position:absolute;left:0;color:var(--red);}
+.pain-note{font-size:11px;color:rgba(239,68,68,0.7);margin-top:8px;font-style:italic;}
+.rest-warning{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.4);border-radius:12px;padding:14px;margin-top:14px;text-align:center;}
+.rest-warning-icon{font-size:28px;margin-bottom:6px;}
+.rest-warning-text{font-size:13px;font-weight:700;color:var(--red);}
+.rest-warning-sub{font-size:11px;color:var(--txt2);margin-top:4px;}
+
+/* ENV IMPACT */
+.env-result{background:var(--bg2);border:1px solid var(--sep);border-radius:12px;padding:14px;margin-top:14px;}
+.env-result-title{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--txt2);margin-bottom:10px;}
+.env-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.env-factor{font-size:12px;color:var(--txt2);}
+.env-val{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;}
+.env-val.neg{color:var(--red);}
+.env-val.pos{color:var(--green);}
+.env-total{border-top:1px solid var(--sep);margin-top:8px;padding-top:8px;}
+.env-verdict{font-size:11px;color:var(--txt2);margin-top:8px;font-style:italic;}
+
+/* SAVE BTN */
+.save-btn{width:100%;padding:16px;background:var(--orange);border:none;border-radius:14px;font-size:15px;font-weight:800;letter-spacing:.5px;color:#fff;cursor:pointer;font-family:inherit;margin-top:8px;transition:opacity .15s;}
+.save-btn:hover{opacity:.88;}
+.save-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* STRENGTH SCREEN */
+.strength-day{margin:0 20px 12px;background:var(--bg1);border:1px solid var(--sep);border-radius:16px;overflow:hidden;}
+.sd-hd{padding:14px 16px;border-bottom:1px solid var(--sep);display:flex;align-items:center;gap:10px;}
+.sd-badge{font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--blue);background:var(--blue2);border:1px solid rgba(59,130,246,0.3);padding:4px 10px;border-radius:4px;}
+.sd-title{font-size:14px;font-weight:800;}
+.sd-sub{font-size:11px;color:var(--txt2);padding:10px 16px 0;}
+.ex-list{padding:10px 16px 16px;}
+.ex-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--sep);}
+.ex-item:last-child{border-bottom:none;}
+.ex-num{width:22px;height:22px;border-radius:6px;background:var(--bg2);border:1px solid var(--sep2);font-size:10px;font-weight:900;color:var(--txt2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.ex-info{}
+.ex-name{font-size:13px;font-weight:700;}
+.ex-detail{font-size:11px;color:var(--txt2);margin-top:2px;}
+.ex-why{font-size:10px;color:var(--orange);margin-top:3px;font-style:italic;}
+
+/* ANALYTICS */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:20px;}
+.stat-card{background:var(--bg1);border:1px solid var(--sep);border-radius:14px;padding:16px;}
+.sc-val{font-size:28px;font-weight:900;letter-spacing:-1px;font-variant-numeric:tabular-nums;}
+.sc-label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-top:4px;}
+canvas.chart{width:100%;display:block;}
+
+/* SETTINGS */
+.settings-section{padding:20px;}
+.settings-section+.settings-section{padding-top:0;}
+.settings-label{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--txt2);margin-bottom:12px;display:block;}
+.settings-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--sep);}
+.settings-row:last-child{border-bottom:none;}
+.sr-left{font-size:14px;font-weight:600;}
+.sr-right{font-size:13px;color:var(--txt2);}
+.danger-btn{padding:14px;background:var(--red2);border:1px solid rgba(239,68,68,0.3);border-radius:12px;color:var(--red);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;text-align:center;}
+
+/* LEGEND ROW */
+.legend{display:flex;gap:6px;flex-wrap:wrap;padding:0 20px 16px;}
+.legend-item{display:flex;align-items:center;gap:5px;}
+.legend-dot{width:8px;height:8px;border-radius:3px;}
+.legend-txt{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--txt2);}
+
+/* PHASE PROGRESS BAR */
+.phase-bar{margin:16px 20px 4px;height:4px;background:var(--bg2);border-radius:2px;overflow:hidden;}
+.phase-fill{height:100%;background:var(--orange);border-radius:2px;transition:width .4s;}
+
+/* EMPTY STATE */
+.empty{padding:40px 20px;text-align:center;color:var(--txt2);}
+.empty-icon{font-size:36px;margin-bottom:12px;}
+.empty-text{font-size:15px;font-weight:600;}
+.empty-sub{font-size:12px;color:var(--txt3);margin-top:6px;}
+
+/* ANIMATIONS */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.screen.active{animation:fadeIn .2s ease;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:0;height:0;}
+
+/* PACE TYPE TAG */
+.type-tag{display:inline-block;font-size:9px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
+.type-tag.easy{background:var(--grn2);color:var(--green);}
+.type-tag.long{background:var(--gold2);color:var(--gold);}
+.type-tag.tempo{background:var(--oran2);color:var(--orange);}
+.type-tag.fartlek{background:var(--purp2);color:var(--purp);}
+.type-tag.interval{background:var(--red2);color:var(--red);}
+.type-tag.gym{background:var(--blue2);color:var(--blue);}
+.type-tag.rest{background:rgba(255,255,255,0.05);color:var(--txt3);}
+.type-tag.race{background:var(--orange);color:#fff;}
+
+/* LOG indicator */
+.logged-check{width:16px;height:16px;border-radius:4px;background:rgba(34,197,94,0.2);border:1px solid rgba(34,197,94,0.4);display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:var(--green);}
+
+/* Note pill */
+.note-pill{background:var(--bg2);border:1px solid var(--sep);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--txt2);margin-top:8px;line-height:1.4;}
+</style>
+</head>
+<body>
+<div id="hdr">
+  <div class="hdr-top">
+    <div class="brand">
+      <span class="brand-eye">Half Marathon</span>
+      <span class="brand-name">RUNJAWN</span>
+      <span class="brand-sub" id="hdr-sub">Loading...</span>
+    </div>
+    <div class="hdr-stats">
+      <div class="hstat"><div class="hstat-v orange" id="hstat-race">—</div><div class="hstat-l">Race Day</div></div>
+      <div class="hstat"><div class="hstat-v gold" id="hstat-pred">—:——</div><div class="hstat-l">Predicted</div></div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="dash">Dashboard</button>
+    <button class="tab" data-tab="cal">Calendar</button>
+    <button class="tab" data-tab="strength">Strength</button>
+    <button class="tab" data-tab="stats">Analytics</button>
+    <button class="tab" data-tab="settings">Settings</button>
+  </div>
+</div>
+
+<div id="main">
+  <!-- DASHBOARD -->
+  <div class="screen active" id="screen-dash">
+    <div class="prog-wrap">
+      <div class="prog-header">
+        <div class="prog-goal">
+          <span class="prog-label">Original Goal</span>
+          <span class="prog-time goal">1:59:59</span>
+        </div>
+        <div class="prog-goal" style="text-align:right">
+          <span class="prog-label">Current Prediction</span>
+          <span class="prog-time pred" id="dash-pred">2:32:00</span>
+          <span class="prog-delta">Gap: <span id="dash-gap">+32:01</span></span>
+        </div>
+      </div>
+      <canvas id="progChart" height="160"></canvas>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div><span class="legend-txt">Goal</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div><span class="legend-txt">Predicted</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div><span class="legend-txt">Logged</span></div>
+    </div>
+    <div class="section" style="padding-top:0">
+      <div class="card">
+        <div class="card-hd"><span class="card-title" id="this-week-label">This Week</span><span id="this-week-miles" style="font-size:12px;font-weight:700;color:var(--txt2)"></span></div>
+        <div class="week-strip" id="week-strip"></div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="card-hd"><span class="card-title">Today's Session</span></div>
+        <div class="card-body" id="today-card"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div class="screen" id="screen-cal">
+    <div id="cal-content"></div>
+  </div>
+
+  <!-- STRENGTH -->
+  <div class="screen" id="screen-strength">
+    <div style="padding:20px 20px 8px">
+      <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--txt2);margin-bottom:6px;">2-Day Strength Program</div>
+      <div style="font-size:13px;color:var(--txt2);line-height:1.5;">Condensed from your 3-day split. Addresses piriformis/glute weakness, APT, left shoulder scapular instability. Preserves energy for 4–5 runs/week.</div>
+    </div>
+    <div class="strength-day">
+      <div class="sd-hd"><span class="sd-badge">Day A</span><span class="sd-title">Lower Body + Core</span></div>
+      <div class="sd-sub">Tuesday · Primary glute activation session. Engage glutes consciously before every rep.</div>
+      <div class="ex-list" id="ex-day-a"></div>
+    </div>
+    <div class="strength-day">
+      <div class="sd-hd"><span class="sd-badge">Day B</span><span class="sd-title">Upper Body + Posterior Chain</span></div>
+      <div class="sd-sub">Friday · Scapular retraction focus. Retract left shoulder actively on every pressing movement.</div>
+      <div class="ex-list" id="ex-day-b"></div>
+    </div>
+    <div style="padding:12px 20px 20px">
+      <div class="note-pill">⚡ <strong>Principle:</strong> Hypertrophy before strength. Sets of 8–12 at RPE 7–8. Rest 60–90 sec between sets. Progress load only when all sets complete with full glute activation and zero compensation. Unilateral movements are primary — both sides must work independently.</div>
+    </div>
+  </div>
+
+  <!-- ANALYTICS -->
+  <div class="screen" id="screen-stats">
+    <div class="stat-grid">
+      <div class="stat-card"><div class="sc-val" id="stat-totalmi">0</div><div class="sc-label">Miles Logged</div></div>
+      <div class="stat-card"><div class="sc-val" id="stat-runs">0</div><div class="sc-label">Runs Logged</div></div>
+      <div class="stat-card"><div class="sc-val" id="stat-streak">0</div><div class="sc-label">Day Streak</div></div>
+      <div class="stat-card"><div class="sc-val" id="stat-vdot" style="font-size:20px">—</div><div class="sc-label">Predicted Finish</div></div>
+    </div>
+    <div class="section" style="padding-top:0">
+      <div class="card">
+        <div class="card-hd"><span class="card-title">Weekly Mileage</span></div>
+        <div style="padding:12px 8px"><canvas id="mileageChart" height="140"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="card-title">Pace Trend</span></div>
+        <div style="padding:12px 8px"><canvas id="paceChart" height="140"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="card-title">Environmental Conditions</span></div>
+        <div class="card-body" id="env-summary">
+          <div class="empty"><div class="empty-icon">🌡️</div><div class="empty-text">Log runs with weather data</div><div class="empty-sub">Environmental analysis will appear here</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="screen" id="screen-settings">
+    <div class="settings-section">
+      <span class="settings-label">Program</span>
+      <div class="card">
+        <div class="card-body">
+          <div class="settings-row"><span class="sr-left">Race Date</span><span class="sr-right" id="set-race-date">Feb 1, 2027</span></div>
+          <div class="settings-row"><span class="sr-left">Program Start</span><span class="sr-right" id="set-start-date">May 4, 2026</span></div>
+          <div class="settings-row"><span class="sr-left">Goal Time</span><span class="sr-right">Sub 1:59:59</span></div>
+          <div class="settings-row"><span class="sr-left">Total Weeks</span><span class="sr-right" id="set-total-weeks">39</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <span class="settings-label">Adjust Race Date</span>
+      <div class="card">
+        <div class="card-body">
+          <div class="fgroup"><label class="form-label">New Race Date</label><input type="date" class="finput" id="new-race-date"></div>
+          <button class="save-btn" style="margin-top:14px" onclick="updateRaceDate()">Update Program</button>
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <span class="settings-label">Data</span>
+      <button class="danger-btn" onclick="confirmReset()">Reset All Logged Data</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOG MODAL -->
+<div id="modal-overlay">
+  <div id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div><div class="modal-title" id="modal-title">Log Run</div><div class="modal-sub" id="modal-sub"></div></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
+const GOAL_SEC = 7199; // 1:59:59 in seconds
+const GOAL_STR = '1:59:59';
+const INIT_PRED_SEC = 9120; // 2:32:00
+
+// ═══════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════
+function secToHMS(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;return `${h}:${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;}
+function secToMS(s){const m=Math.floor(s/60),ss=s%60;return `${m}:${String(ss).padStart(2,'0')}`;}
+function msToSec(str){if(!str)return null;const p=str.split(':');return parseInt(p[0])*60+(parseInt(p[1])||0);}
+function hmsToSec(str){if(!str)return null;const p=str.split(':');if(p.length===3)return parseInt(p[0])*3600+parseInt(p[1])*60+(parseInt(p[2])||0);return parseInt(p[0])*60+(parseInt(p[1])||0);}
+function dateStr(d){return d.toISOString().split('T')[0];}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function today(){return dateStr(new Date());}
+function fmtDate(s){const d=new Date(s+'T00:00:00');return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+function fmtDateLong(s){const d=new Date(s+'T00:00:00');return d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});}
+function daysBetween(a,b){return Math.round((new Date(b)-new Date(a))/(1000*60*60*24));}
+function weeksBetween(a,b){return Math.round(daysBetween(a,b)/7);}
+function typeIcon(t){return{easy:'🏃',long:'🛣️',tempo:'⚡',fartlek:'🌀',interval:'🔥',gym:'🏋️',rest:'💤',race:'🏁'}[t]||'📅';}
+function typeColor(t){return{easy:'var(--green)',long:'var(--gold)',tempo:'var(--orange)',fartlek:'var(--purp)',interval:'var(--red)',gym:'var(--blue)',rest:'var(--txt3)',race:'var(--orange)'}[t]||'var(--txt3)';}
+function typeDotClass(t){return`dot-${t}`;}
+
+// ═══════════════════════════════════════════════════════
+// TRAINING PLAN GENERATOR
+// ═══════════════════════════════════════════════════════
+function generatePlan(startDateStr, raceDateStr) {
+  const startDate = new Date(startDateStr + 'T00:00:00');
+  const raceDate  = new Date(raceDateStr  + 'T00:00:00');
+  const totalWeeks = Math.max(8, weeksBetween(startDateStr, raceDateStr));
+
+  // Mileage ramp: 10% rule with deload every 4th week
+  const deloadWeeks = new Set();
+  const weeklyMiles = [];
+  let base = 12, peak = 0;
+  for (let w = 0; w < totalWeeks; w++) {
+    const wn = w + 1;
+    const isDeload = wn % 4 === 0 && wn < totalWeeks - 3;
+    if (isDeload) { deloadWeeks.add(wn); weeklyMiles.push(Math.round(base * 0.75)); }
+    else {
+      const taperStart = totalWeeks - 5;
+      if (wn > taperStart) {
+        const taperPct = 1 - 0.18 * (wn - taperStart);
+        weeklyMiles.push(Math.round(peak * Math.max(0.3, taperPct)));
+      } else {
+        base = Math.min(45, w === 0 ? 12 : Math.round(weeklyMiles[w-1] * (isDeload?0.75:1.10)));
+        peak = Math.max(peak, base);
+        weeklyMiles.push(base);
+      }
+    }
+  }
+
+  // Phase assignment
+  function getPhase(wn, total) {
+    const t = wn / total;
+    if (t <= 0.21) return 'FOUNDATION';
+    if (t <= 0.42) return 'BUILD';
+    if (t <= 0.62) return 'DEVELOPMENT';
+    if (t <= 0.85) return 'RACE SPECIFIC';
+    if (wn < total) return 'TAPER';
+    return 'RACE WEEK';
+  }
+
+  // Pace progression (seconds/mile)
+  function easyPaceSec(wn) {
+    const t = Math.min(1, (wn-1) / Math.max(1, totalWeeks*0.85-1));
+    return Math.round(770 - 175 * t); // 12:50 → 9:55
+  }
+  function tempoPaceSec(wn) { return easyPaceSec(wn) - 105; }
+  function longPaceSec(wn)  { return easyPaceSec(wn) + 55; }
+  function goalPaceSec()    { return 549; } // 9:09/mile
+
+  const weeks = [];
+  const tdStr = today();
+
+  for (let w = 0; w < totalWeeks; w++) {
+    const wn = w + 1;
+    const isDeload = deloadWeeks.has(wn);
+    const isRaceWeek = wn === totalWeeks;
+    const phase = getPhase(wn, totalWeeks);
+    const wMiles = weeklyMiles[w] || 0;
+    const wStart = new Date(startDate);
+    wStart.setDate(startDate.getDate() + w * 7);
+
+    const ep = easyPaceSec(wn);
+    const tp = tempoPaceSec(wn);
+    const lp = longPaceSec(wn);
+
+    // Long run distance
+    const maxLong = Math.min(14, Math.round(wMiles * 0.33));
+    const longDist = isDeload ? Math.max(4, maxLong - 2) : maxLong;
+
+    // Days
+    const days = [];
+    for (let d = 0; d < 7; d++) {
+      const dayDate = new Date(wStart);
+      dayDate.setDate(wStart.getDate() + d);
+      const ds = dateStr(dayDate);
+      const DN = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][d];
+      let type='rest', dist=null, pace=null, rpe=null, note='';
+
+      if (isRaceWeek) {
+        // Find which weekday (Mon=0) the race falls on
+        const raceDt = new Date(raceDateStr + 'T00:00:00');
+        const raceWkDay = (raceDt.getDay() + 6) % 7; // Mon=0 … Sun=6
+        // Fill days leading to race with easy shakeout, then race, then rest
+        const preRaceScripts = [
+          {type:'easy',dist:3,pace:ep+30,rpe:4,note:'Easy shakeout. Light strides at end.'},
+          {type:'easy',dist:2,pace:ep+60,rpe:3,note:'Very easy. Stay fresh.'},
+          {type:'easy',dist:2,pace:ep+15,rpe:4,note:'Short strides ×4 at end.'},
+          {type:'rest',note:'Rest. Gear check. Hydrate.'},
+          {type:'easy',dist:1,pace:ep,rpe:3,note:'Optional 10-min shakeout or full rest.'},
+          {type:'rest',note:'Rest. Sleep early. Race tomorrow.'},
+        ];
+        let rw;
+        if (d === raceWkDay) {
+          rw = {type:'race',dist:13.1,pace:goalPaceSec(),rpe:9,note:'RACE DAY — Execute. Sub 2:00.'};
+        } else if (d < raceWkDay) {
+          const idx = Math.max(0, preRaceScripts.length - (raceWkDay - d));
+          rw = preRaceScripts[Math.min(idx, preRaceScripts.length-1)];
+        } else {
+          rw = {type:'rest',note:'Post-race recovery. Celebrate.'};
+        }
+        type=rw.type; dist=rw.dist||null; pace=rw.pace||null; rpe=rw.rpe||null; note=rw.note;
+      } else if (d===1) { // Tue: Gym A
+        type='gym'; note='Day A — Lower Body + Core';
+      } else if (d===4) { // Fri: Gym B
+        type='gym'; note='Day B — Upper Body + Posterior Chain';
+      } else if (d===5) { // Sat: Long
+        type='long';
+        dist=longDist;
+        pace=lp+(isDeload?30:0);
+        rpe=isDeload?5:7;
+        note = wn>=25 ? 'Last 2–3 miles at goal race pace (9:09/mi).' : 'Conversational pace. Glute cues every mile.';
+      } else if (d===6) { // Sun
+        if (phase==='RACE SPECIFIC'||phase==='DEVELOPMENT') {
+          type='easy'; dist=Math.round(wMiles*0.14); pace=ep+60; rpe=3; note='Recovery run. Very easy.';
+        } else { type='rest'; note='Rest. Foam roll, stretch, hydrate.'; }
+      } else if (d===0) { // Mon
+        type='easy';
+        dist=Math.round(wMiles*(isDeload?0.18:0.22));
+        pace=ep+20; rpe=isDeload?4:5;
+        note = wn>=4 ? 'Easy run + 4×20s strides at end.' : 'Easy aerobic. Conversational pace.';
+      } else if (d===2) { // Wed: Quality
+        if (phase==='FOUNDATION'||isDeload) {
+          type='easy'; dist=Math.round(wMiles*0.20); pace=ep+20; rpe=5;
+          note = wn>=4 ? 'Easy + 4×20s strides.' : 'Easy aerobic. Build engine.';
+        } else if (phase==='BUILD') {
+          type='tempo'; dist=Math.round(wMiles*0.20); pace=tp; rpe=7;
+          const tMin = Math.min(30, 15 + (wn-9)*2);
+          note=`Warm-up 10 min easy → ${tMin} min at tempo → 10 min easy cool-down.`;
+        } else if (phase==='DEVELOPMENT') {
+          const alt = wn%2===0;
+          type = alt ? 'fartlek' : 'tempo';
+          dist = Math.round(wMiles*0.20); pace=tp; rpe=7;
+          note = alt ? 'Fartlek: 8×1 min hard / 2 min easy (after 10 min warm-up).' : 'Tempo: 10 min warm-up → 25 min continuous → 10 min cool-down.';
+        } else { // Race specific + taper
+          const r3=wn%3;
+          if(r3===0){type='interval';dist=Math.round(wMiles*0.18);pace=tp-35;rpe=8;note='6×800m at 5K effort. 400m jog recovery between. 10 min warm-up/cool-down.';}
+          else if(r3===1){type='tempo';dist=Math.round(wMiles*0.22);pace=tp;rpe=8;note='15 min warm-up → 30 min at lactate threshold → 10 min cool-down.';}
+          else{type='fartlek';dist=Math.round(wMiles*0.20);pace=tp;rpe=7;note='10×1 min surge at goal race pace / 1 min float. 10 min warm-up.';}
+        }
+      } else if (d===3) { // Thu
+        if ((phase==='BUILD'||phase==='DEVELOPMENT'||phase==='RACE SPECIFIC')&&!isDeload) {
+          type='easy'; dist=Math.round(wMiles*0.17); pace=ep+45; rpe=4; note='Easy recovery run. If still fatigued, swap for rest.';
+        } else { type='rest'; note='Rest. Foam roll. Stretch hip flexors.'; }
+      }
+
+      days.push({ date:ds, dayName:DN, type, planned:{dist,pace:pace?secToMS(pace):null,rpe,note}, logged:null });
+    }
+
+    weeks.push({ weekNum:wn, phase, isDeload, targetMiles:wMiles, startDate:dateStr(wStart), days });
+  }
+
+  return { startDate:startDateStr, raceDate:raceDateStr, goalTime:GOAL_STR, weeks };
+}
+
+// ═══════════════════════════════════════════════════════
+// PAIN RECOMMENDATION DB
+// ═══════════════════════════════════════════════════════
+const PAIN_DB = {
+  glutes: {
+    label:'Glutes',
+    exercises:['Hip Abduction Machine 3×15 (light, mind-muscle focus)','Weighted GHD Hip Hinge 3×12 at RPE 6','Glute Bridge with 2-sec hold 3×20','Clamshells with mini-band 3×20 each side','Single-leg Glute Bridge 3×15 each side'],
+    note:'Critical: piriformis compensation pattern. Engage glutes consciously before every rep. If pain is sharp, reduce load 50% and focus on activation only.'
+  },
+  quads: {
+    label:'Quads',
+    exercises:['Bulgarian Split Squat (light) 3×10','Terminal Knee Extensions with band 3×15','Step-ups (controlled eccentric) 3×12 each side'],
+    note:'Reduce running volume temporarily. Eccentric loading accelerates recovery.'
+  },
+  hamstrings: {
+    label:'Hamstrings',
+    exercises:['Nordic Curl (limited ROM) 2×6','Seated Leg Curl (controlled) 3×12','GHD Hip Hinge (light) 3×10'],
+    note:'Avoid loaded hip hinge if pain is acute. Prioritize eccentric loading in recovery phase.'
+  },
+  calves: {
+    label:'Calves',
+    exercises:['Eccentric Single-leg Calf Raise 3×15 (slow descent)','Seated Calf Raise 3×15','Ankle alphabet circles 2×1 set each foot'],
+    note:'May indicate shin splint onset. Reduce running volume. Ice after runs. Check shoe wear pattern.'
+  },
+  shins: {
+    label:'Shins',
+    exercises:['Tibialis Raise (seated, foot flexed) 3×20','Ankle circles 2×20 each direction','Toe taps (rapid) 2×30'],
+    note:'Shin splint warning. Reduce mileage 25–30%, cross-train (pool running or bike). See physio if persists >5 days.'
+  },
+  hip_flexors: {
+    label:'Hip Flexors',
+    exercises:['Couch Stretch 90 sec each side (daily)','Standing Hip Flexor Stretch 60 sec each side','Glute Bridges to restore pelvic position 3×20','Dead Bug 3×8 each side'],
+    note:'Tight hip flexors drive your APT. Release before every run and gym session. Priority corrective work.'
+  },
+  it_band: {
+    label:'IT Band',
+    exercises:['Hip Abduction Machine 3×15','Glute Med Side-lying raises 3×20','Single-leg Balance holds 3×30 sec each','Lateral band walks 3×15 each direction'],
+    note:'IT band issues = hip abductor weakness. Do NOT aggressively foam roll if acutely inflamed — gentle only.'
+  },
+  knee: {
+    label:'Knee',
+    exercises:['Straight-leg Raises 3×15','Hip Abduction Machine 3×15','VMO Step-downs (controlled) 3×10 each','Copenhagen Plank (reduced lever) 3×20 sec'],
+    note:'Knee feedback = glutes/core have disengaged. Stop and re-engage before continuing. Dull awareness is a signal, not an alarm — sharp pain means stop.'
+  },
+  piriformis: {
+    label:'Piriformis',
+    exercises:['Hip Abduction Machine 3×15 (immediate priority)','Pigeon Pose 90 sec each side','Seated Figure-4 stretch 60 sec each side','Glute Bridge 3×20 (activation focus)','Hip Internal Rotation stretch 60 sec each side'],
+    note:'PRIORITY AREA. Piriformis flare = glutes not firing. Immediate glute activation protocol. Do not run through sharp sciatic sensation.'
+  },
+  lower_back: {
+    label:'Lower Back',
+    exercises:['Dead Bug 3×8 each side (anti-extension core)','Bird Dog 3×10 each side','McKenzie Press-up 2×10','Cat-Cow mobility 2×10'],
+    note:'Lower back pain under load = APT pattern. Focus on glute activation to posteriorly tilt pelvis. Avoid conventional deadlift or barbell squat until resolved.'
+  },
+  left_shoulder: {
+    label:'Left Shoulder',
+    exercises:['Band Pull-apart 3×20 (retraction focus)','Face Pull 3×15','Single-arm Cable Row (retraction emphasis) 3×12','Scapular Wall Slides 3×10'],
+    note:'Left scapula dumps forward under load. Prioritize retraction cues. Reduce pressing load — stable base before strength.'
+  },
+};
+
+// ═══════════════════════════════════════════════════════
+// ALGORITHMS
+// ═══════════════════════════════════════════════════════
+
+// Riegel formula: T2 = T1 × (D2/D1)^1.06
+function riegelPredict(paceSec, distMi, targetDist) {
+  const t1 = paceSec * distMi;
+  return Math.round(t1 * Math.pow(targetDist / distMi, 1.06));
+}
+
+// VDOT approximation from pace + distance
+function estimateVDOT(paceSec, distMi) {
+  const totalSec = paceSec * distMi;
+  const totalMin = totalSec / 60;
+  // Simplified from Daniels' tables
+  const mPerMin = distMi * 1609.34 / totalMin;
+  const pct = 0.8 + 0.1894393 * Math.exp(-0.012778 * totalMin) + 0.2989558 * Math.exp(-0.1932605 * totalMin);
+  const vo2 = (-4.60 + 0.182258 * mPerMin + 0.000104 * mPerMin * mPerMin) / pct;
+  return Math.max(20, Math.min(85, Math.round(vo2)));
+}
+
+function calcEnvImpact(temp, uv, tod, conditions) {
+  if (temp === null || temp === undefined) return null;
+  let tempImp = 0, uvImp = 0, todImp = 0, humImp = 0;
+
+  // Temp (reference 55°F optimal)
+  if (temp > 55) tempImp = (temp - 55) * 0.65;
+  else if (temp < 35) tempImp = (35 - temp) * 0.3;
+
+  // UV
+  if (uv >= 6) uvImp = (uv - 5) * 3;
+
+  // Time of day
+  if (tod === 'midday' || tod === 'afternoon') todImp = 12;
+
+  // Conditions
+  if (conditions === 'humid') humImp = 20;
+  else if (conditions === 'wind_head') humImp = 15;
+
+  const total = Math.round(tempImp + uvImp + todImp + humImp);
+  return {
+    tempImp:Math.round(tempImp), uvImp:Math.round(uvImp), todImp, humImp,
+    total,
+    verdict: total > 35 ? 'Significant drag. Effort was stronger than pace shows. Adjust prediction upward.' 
+           : total > 15 ? `Moderate conditions. Equivalent to ~${total}s/mile fresher pace.`
+           : 'Good conditions. Pace closely reflects true fitness.'
+  };
+}
+
+function getPrediction(logs) {
+  // Filter for real runs (not gym, not rest) with pace logged
+  const runs = logs.filter(l => l.logged && l.logged.pace && l.logged.dist >= 2.0 && l.type !== 'gym');
+  if (!runs.length) return { sec: INIT_PRED_SEC, str: secToHMS(INIT_PRED_SEC), vdot: null };
+
+  // Take best recent 3 runs
+  const recent = runs.slice(-5);
+  const predictions = recent.map(r => {
+    const paceSec = msToSec(r.logged.pace);
+    if (!paceSec) return null;
+    const raw = riegelPredict(paceSec, r.logged.dist, 13.1);
+    // RPE adjust: if easy run (RPE 4-5), true fitness is better
+    const rpe = r.logged.rpe || 6;
+    const adj = Math.max(0, (9 - rpe) * 0.025);
+    return Math.round(raw * (1 - adj));
+  }).filter(Boolean);
+
+  if (!predictions.length) return { sec: INIT_PRED_SEC, str: secToHMS(INIT_PRED_SEC), vdot: null };
+  const avg = Math.round(predictions.reduce((a,b)=>a+b,0) / predictions.length);
+  const best = Math.min(...predictions);
+  // Weight toward best recent prediction
+  const predSec = Math.round(avg * 0.6 + best * 0.4);
+  const latest = recent[recent.length-1];
+  const vdot = estimateVDOT(msToSec(latest.logged.pace), latest.logged.dist);
+  return { sec: predSec, str: secToHMS(predSec), vdot };
+}
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const STORAGE_KEY = 'runjawn-hm-v1';
+
+function defaultState() {
+  const plan = generatePlan('2026-05-04', '2027-02-01');
+  return { plan, logs:{} };
+}
+
+let ST = null;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) { ST = JSON.parse(raw); return; }
+  } catch(e){}
+  ST = defaultState();
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ST)); } catch(e) {}
+}
+
+// Flatten all days into logs array
+function allLogs() {
+  const logs = [];
+  for (const w of ST.plan.weeks) for (const d of w.days) {
+    if (d.logged) logs.push({...d, weekNum:w.weekNum});
+  }
+  return logs;
+}
+
+// Find day by date
+function findDay(ds) {
+  for (const w of ST.plan.weeks) for (const d of w.days) if (d.date === ds) return {week:w, day:d};
+  return null;
+}
+
+// Current week
+function currentWeekIndex() {
+  const td = today();
+  for (let i = 0; i < ST.plan.weeks.length; i++) {
+    const w = ST.plan.weeks[i];
+    const wEnd = dateStr(addDays(new Date(w.startDate+'T00:00:00'), 6));
+    if (w.startDate <= td && td <= wEnd) return i;
+  }
+  // Before start
+  if (today() < ST.plan.weeks[0].startDate) return 0;
+  return ST.plan.weeks.length - 1;
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER HEADER
+// ═══════════════════════════════════════════════════════
+function renderHeader() {
+  const td = today();
+  const raceDate = ST.plan.raceDate;
+  const days = Math.max(0, daysBetween(td, raceDate));
+  const weeks = Math.ceil(days / 7);
+  document.getElementById('hstat-race').textContent = weeks > 0 ? `${weeks}wk` : 'RACE!';
+  const pred = getPrediction(allLogs());
+  document.getElementById('hstat-pred').textContent = secToHMS(pred.sec).substring(0,7);
+
+  const wi = currentWeekIndex();
+  const w = ST.plan.weeks[wi];
+  document.getElementById('hdr-sub').textContent = `${w.phase} · Week ${w.weekNum} of ${ST.plan.weeks.length}`;
+}
+
+// ═══════════════════════════════════════════════════════
+// PROGRESS CHART
+// ═══════════════════════════════════════════════════════
+function renderProgressChart() {
+  const canvas = document.getElementById('progChart');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.parentElement.clientWidth - 40;
+  const h = 160;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const total = ST.plan.weeks.length;
+  const logs = allLogs();
+  const pred = getPrediction(logs);
+
+  // Goal line: INIT_PRED_SEC → GOAL_SEC over total weeks
+  const minVal = GOAL_SEC - 600;
+  const maxVal = INIT_PRED_SEC + 300;
+  const range = maxVal - minVal;
+
+  function yPos(sec) { return h - 20 - ((sec - minVal) / range) * (h - 40); }
+  function xPos(wi)  { return 10 + (wi / (total - 1)) * (w - 20); }
+
+  // Background grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let s = GOAL_SEC; s <= INIT_PRED_SEC + 600; s += 600) {
+    const y = yPos(s);
+    if (y < 0 || y > h) continue;
+    ctx.beginPath(); ctx.moveTo(10, y); ctx.lineTo(w-10, y); ctx.stroke();
+  }
+
+  // Goal line (orange dashed)
+  ctx.strokeStyle = 'rgba(232,70,10,0.5)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(xPos(0), yPos(GOAL_SEC));
+  ctx.lineTo(xPos(total-1), yPos(GOAL_SEC));
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Original prediction trajectory (gray)
+  ctx.strokeStyle = 'rgba(120,120,150,0.3)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([2, 4]);
+  ctx.beginPath();
+  for (let wi = 0; wi < total; wi++) {
+    const t = wi / (total - 1);
+    const sec = Math.round(INIT_PRED_SEC + (GOAL_SEC - INIT_PRED_SEC) * t);
+    if (wi === 0) ctx.moveTo(xPos(wi), yPos(sec));
+    else ctx.lineTo(xPos(wi), yPos(sec));
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Logged data points
+  const loggedPoints = [];
+  for (const w2 of ST.plan.weeks) {
+    for (const d of w2.days) {
+      if (d.logged && d.logged.pace && d.logged.dist >= 2) {
+        const ps = msToSec(d.logged.pace);
+        if (ps) {
+          const rawPred = riegelPredict(ps, d.logged.dist, 13.1);
+          loggedPoints.push({ wi: w2.weekNum - 1, sec: rawPred });
+        }
+      }
+    }
+  }
+
+  if (loggedPoints.length > 1) {
+    ctx.strokeStyle = 'rgba(34,197,94,0.7)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i < loggedPoints.length; i++) {
+      const p = loggedPoints[i];
+      const y = Math.max(2, Math.min(h - 2, yPos(p.sec)));
+      if (i === 0) ctx.moveTo(xPos(p.wi), y);
+      else ctx.lineTo(xPos(p.wi), y);
+    }
+    ctx.stroke();
+  }
+
+  // Logged dots
+  for (const p of loggedPoints) {
+    const y = Math.max(2, Math.min(h - 2, yPos(p.sec)));
+    ctx.fillStyle = 'var(--green)';
+    ctx.beginPath();
+    ctx.arc(xPos(p.wi), y, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Current prediction dot
+  const wi2 = currentWeekIndex();
+  ctx.fillStyle = '#D4A843';
+  ctx.beginPath();
+  ctx.arc(xPos(wi2), yPos(pred.sec), 5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Time labels on y axis
+  ctx.fillStyle = 'rgba(120,120,150,0.6)';
+  ctx.font = '10px -apple-system,sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('1:59', w - 30, yPos(GOAL_SEC) - 4);
+
+  // Update dashboard values
+  document.getElementById('dash-pred').textContent = secToHMS(pred.sec).substring(0,7);
+  const gap = pred.sec - GOAL_SEC;
+  const gapEl = document.getElementById('dash-gap');
+  if (gap > 0) { gapEl.textContent = `+${secToHMS(gap).substring(0,7)}`; gapEl.parentElement.innerHTML = `Gap: <span>${'+' + secToHMS(gap).substring(0,7)}</span>`; }
+  else { gapEl.parentElement.innerHTML = `Gap: <span class="good">${secToHMS(Math.abs(gap)).substring(0,7)} UNDER</span>`; }
+}
+
+// ═══════════════════════════════════════════════════════
+// THIS WEEK STRIP
+// ═══════════════════════════════════════════════════════
+function renderWeekStrip() {
+  const wi = currentWeekIndex();
+  const week = ST.plan.weeks[wi];
+  const td = today();
+
+  document.getElementById('this-week-label').textContent = `Week ${week.weekNum} — ${week.phase}`;
+
+  let logged = 0, target = week.targetMiles;
+  for (const d of week.days) if (d.logged && d.logged.dist) logged += d.logged.dist;
+  document.getElementById('this-week-miles').textContent = `${logged.toFixed(1)} / ${target} mi`;
+
+  const html = week.days.map((d,i) => {
+    const isToday = d.date === td;
+    const isDone = d.logged && d.logged.done;
+    const dotClass = isDone ? 'dot-done' : typeDotClass(d.type);
+    const icon = isDone ? '✓' : typeIcon(d.type);
+    const mi = d.logged && d.logged.dist ? `${d.logged.dist}mi` : (d.planned.dist ? `${d.planned.dist}mi` : '');
+    return `<div class="ws-day${isToday?' today':''}${isDone?' done':''}" onclick="openDayModal('${d.date}')">
+      <span class="ws-dn">${d.dayName}</span>
+      <div class="ws-dot ${dotClass}">${icon}</div>
+      <span class="ws-mi">${mi}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('week-strip').innerHTML = html;
+
+  // Today card
+  const todayDay = week.days.find(d => d.date === td);
+  if (todayDay) renderTodayCard(todayDay);
+  else {
+    const nextDay = week.days.find(d => d.date > td);
+    if (nextDay) renderTodayCard(nextDay, true);
+  }
+}
+
+function renderTodayCard(day, isNext=false) {
+  const el = document.getElementById('today-card');
+  if (!el) return;
+  const label = isNext ? 'Next Session' : 'Today';
+  const typeC = typeColor(day.type);
+  const logged = day.logged;
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <div style="width:44px;height:44px;border-radius:12px;background:${typeC}22;border:1px solid ${typeC}44;display:flex;align-items:center;justify-content:center;font-size:20px">${typeIcon(day.type)}</div>
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--txt2)">${label} · ${fmtDate(day.date)}</div>
+        <div style="font-size:17px;font-weight:800;letter-spacing:-.3px;text-transform:capitalize">${day.type}</div>
+      </div>
+      <span class="type-tag ${day.type}" style="margin-left:auto">${day.type}</span>
+    </div>
+    ${day.planned.dist ? `<div style="display:flex;gap:16px;margin-bottom:10px">
+      <div><span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--txt3)">Target</span><div style="font-size:16px;font-weight:800;font-variant-numeric:tabular-nums">${day.planned.dist} mi</div></div>
+      ${day.planned.pace ? `<div><span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--txt3)">Est. Pace</span><div style="font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;font-family:'SF Mono',monospace">${day.planned.pace}/mi</div></div>` : ''}
+      ${day.planned.rpe ? `<div><span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--txt3)">RPE</span><div style="font-size:16px;font-weight:800">${day.planned.rpe}</div></div>` : ''}
+    </div>` : ''}
+    ${day.planned.note ? `<div class="note-pill">${day.planned.note}</div>` : ''}
+    ${logged ? `<div style="margin-top:12px;padding:10px 12px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:10px;font-size:12px;color:var(--green)">✓ Logged: ${logged.dist||'—'} mi at ${logged.pace||'—'}/mi · RPE ${logged.rpe||'—'}</div>` : ''}
+    ${!logged && day.type !== 'rest' ? `<button class="save-btn" style="margin-top:12px" onclick="openDayModal('${day.date}')">Log This Session</button>` : ''}
+  `;
+}
+
+// ═══════════════════════════════════════════════════════
+// CALENDAR RENDER
+// ═══════════════════════════════════════════════════════
+function renderCalendar() {
+  const td = today();
+  let html = '';
+  let lastPhase = '';
+
+  for (const w of ST.plan.weeks) {
+    if (w.phase !== lastPhase) {
+      lastPhase = w.phase;
+      const phaseDescs = {
+        FOUNDATION:'Build aerobic base & establish glute activation.',
+        BUILD:'Introduce tempo runs & increase mileage.',
+        DEVELOPMENT:'Fartlek, race pace exposure & sustained tempo.',
+        'RACE SPECIFIC':'Threshold efforts, surges & race simulation.',
+        TAPER:'Reduce volume, maintain intensity, stay sharp.',
+        'RACE WEEK':'Execution.',
+      };
+      html += `<div class="cal-phase"><span class="phase-badge">${w.phase}</span><span class="phase-name">${phaseDescs[w.phase]||''}</span></div>`;
+    }
+
+    const isCurrent = w.days.some(d => d.date <= td) && w.days.some(d => d.date >= td);
+    let totalLogged = 0;
+    for (const d of w.days) if (d.logged && d.logged.dist) totalLogged += d.logged.dist;
+
+    const daysHtml = w.days.map(d => {
+      const isToday2 = d.date === td;
+      const isDone = d.logged && d.logged.done;
+      const dc = isDone ? 'dot-done' : typeDotClass(d.type);
+      const icon = isDone ? '✓' : typeIcon(d.type);
+      const mi = d.logged && d.logged.dist ? `${d.logged.dist}` : (d.planned.dist ? `${d.planned.dist}` : '');
+      return `<div class="wd${isToday2?' today-cal':''}${isDone?' logged':''}" onclick="openDayModal('${d.date}')">
+        <span class="wd-name">${d.dayName}</span>
+        <div class="wd-dot ${dc}">${icon}</div>
+        <span class="wd-mi">${mi}</span>
+      </div>`;
+    }).join('');
+
+    html += `<div class="week-row${isCurrent?' current-week':''}">
+      <div class="week-hd">
+        <span class="week-num">Wk ${w.weekNum}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${w.isDeload ? '<span class="week-deload">Deload</span>' : ''}
+          <span class="week-miles">${w.targetMiles}<span>mi target</span></span>
+          ${totalLogged > 0 ? `<span style="font-size:11px;color:var(--green);font-weight:700">${totalLogged.toFixed(1)} logged</span>` : ''}
+        </div>
+      </div>
+      <div class="week-days">${daysHtml}</div>
+    </div>`;
+  }
+
+  document.getElementById('cal-content').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+// STRENGTH SCREEN
+// ═══════════════════════════════════════════════════════
+const STRENGTH_DAYS = {
+  a: [
+    { name:'Dumbbell Bulgarian Split Squat', detail:'3×10–12 each side · RPE 7–8', why:'Highest-value unilateral lower body. Activates glutes & exposes left-side deficit.' },
+    { name:'Weighted GHD Hip Hinge', detail:'3×12 · RPE 7', why:'Hip hinge with posterior chain dominance. Glute-first loading pattern.' },
+    { name:'Seated Hip Abduction Machine', detail:'3×15 · RPE 6–7', why:'Direct glute medius. Piriformis prevention. Priority area.' },
+    { name:'Seated Hip Adduction Machine', detail:'3×15 · RPE 6', why:'Medial stability. Adductor support for gait mechanics.' },
+    { name:'Dynamic Long-Lever Copenhagen Plank', detail:'3×20 sec each side', why:'Lateral hip stability & adductor strength. Running economy transfer.' },
+    { name:'Ab Wheel Rollout', detail:'3×8–10 · RPE 7', why:'Anti-extension core. Protects lumbar under running load.' },
+  ],
+  b: [
+    { name:'Chest-Supported Overhand T-Bar Row', detail:'3×10–12 · RPE 7–8', why:'Scapular retraction against support. Trains left shoulder to retract without compensation.' },
+    { name:'Neutral-Grip Cable Lat Pulldown', detail:'3×10–12 · RPE 7', why:'Vertical pull. Lat strength for arm drive in running.' },
+    { name:'Incline Pause Bench Press', detail:'3×8–10 · RPE 7', why:'Controlled pressing. Incline reduces shoulder impingement risk vs flat.' },
+    { name:'Seated Neutral-Grip Dumbbell OHP', detail:'3×10–12 · RPE 7', why:'Overhead stability. Neutral grip reduces left shoulder stress.' },
+    { name:'Weighted Russian Twists', detail:'3×12 each side · RPE 6', why:'Rotational core. Transfers to running trunk control.' },
+  ]
+};
+
+function renderStrength() {
+  ['a','b'].forEach(key => {
+    const el = document.getElementById(`ex-day-${key}`);
+    if (!el) return;
+    el.innerHTML = STRENGTH_DAYS[key].map((ex, i) => `
+      <div class="ex-item">
+        <div class="ex-num">${i+1}</div>
+        <div class="ex-info">
+          <div class="ex-name">${ex.name}</div>
+          <div class="ex-detail">${ex.detail}</div>
+          <div class="ex-why">${ex.why}</div>
+        </div>
+      </div>`).join('');
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// ANALYTICS
+// ═══════════════════════════════════════════════════════
+function renderAnalytics() {
+  const logs = allLogs();
+  const runs = logs.filter(l => l.logged && l.type !== 'gym' && l.type !== 'rest');
+  const totalMi = runs.reduce((a,r) => a + (r.logged.dist||0), 0);
+  const pred = getPrediction(logs);
+
+  document.getElementById('stat-totalmi').textContent = totalMi.toFixed(1);
+  document.getElementById('stat-runs').textContent = runs.length;
+  document.getElementById('stat-vdot').textContent = pred.sec < INIT_PRED_SEC ? secToHMS(pred.sec).substring(0,7) : '—';
+
+  // Streak
+  let streak = 0;
+  const td2 = today();
+  let cur = new Date(td2+'T00:00:00');
+  for (let i = 0; i < 60; i++) {
+    const ds = dateStr(cur);
+    const found = findDay(ds);
+    if (found && found.day.logged && found.day.logged.done) streak++;
+    else if (i > 0) break;
+    cur = addDays(cur, -1);
+  }
+  document.getElementById('stat-streak').textContent = streak;
+
+  // Weekly mileage chart
+  renderMileageChart();
+  renderPaceChart();
+  renderEnvSummary();
+}
+
+function renderMileageChart() {
+  const canvas = document.getElementById('mileageChart');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.clientWidth;
+  const H = 140;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const weeks = ST.plan.weeks;
+  const recent = weeks.slice(-16);
+  const max = Math.max(...recent.map(w => w.targetMiles), 1);
+  const barW = (W - 20) / recent.length;
+
+  ctx.fillStyle = 'rgba(255,255,255,0.03)';
+  ctx.fillRect(0, 0, W, H);
+
+  recent.forEach((w, i) => {
+    const logged = w.days.reduce((a,d)=>a+(d.logged&&d.logged.dist?d.logged.dist:0),0);
+    const target = w.targetMiles;
+    const bx = 10 + i * barW + barW * 0.1;
+    const bw = barW * 0.8;
+
+    // Target bar (dim)
+    const th = ((target / max) * (H - 30));
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.beginPath();
+    ctx.roundRect(bx, H-10-th, bw, th, 3);
+    ctx.fill();
+
+    // Logged bar
+    if (logged > 0) {
+      const lh = ((logged / max) * (H - 30));
+      ctx.fillStyle = w.days.some(d=>d.date===today()) ? 'rgba(232,70,10,0.7)' : 'rgba(34,197,94,0.6)';
+      ctx.beginPath();
+      ctx.roundRect(bx, H-10-lh, bw, lh, 3);
+      ctx.fill();
+    }
+
+    // Week label
+    ctx.fillStyle = 'rgba(120,120,150,0.5)';
+    ctx.font = `${Math.max(8, Math.floor(barW*0.4))}px -apple-system,sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(w.weekNum, bx + bw/2, H - 2);
+  });
+}
+
+function renderPaceChart() {
+  const canvas = document.getElementById('paceChart');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.clientWidth;
+  const H = 140;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const points = [];
+  for (const w of ST.plan.weeks) {
+    for (const d of w.days) {
+      if (d.logged && d.logged.pace && d.logged.dist >= 1) {
+        const ps = msToSec(d.logged.pace);
+        if (ps) points.push({ wi: w.weekNum - 1, sec: ps, type: d.type });
+      }
+    }
+  }
+
+  if (points.length < 2) {
+    ctx.fillStyle = 'rgba(120,120,150,0.3)';
+    ctx.font = '13px -apple-system,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Log runs to see pace trend', W/2, H/2);
+    return;
+  }
+
+  const total = ST.plan.weeks.length;
+  const paceMin = Math.min(...points.map(p=>p.sec)) - 30;
+  const paceMax = Math.max(...points.map(p=>p.sec)) + 60;
+  const range = paceMax - paceMin;
+
+  function px(wi) { return 10 + (wi / (total-1)) * (W-20); }
+  function py(sec) { return H - 20 - ((sec - paceMin) / range) * (H - 35); }
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let s = Math.ceil(paceMin/60)*60; s <= paceMax; s += 60) {
+    ctx.beginPath(); ctx.moveTo(10, py(s)); ctx.lineTo(W-10, py(s)); ctx.stroke();
+    ctx.fillStyle = 'rgba(120,120,150,0.4)';
+    ctx.font = '9px -apple-system,sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText(secToMS(s), 12, py(s) - 2);
+  }
+
+  // Goal pace line
+  const gp = 549;
+  if (gp >= paceMin && gp <= paceMax) {
+    ctx.strokeStyle = 'rgba(232,70,10,0.4)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3,4]);
+    ctx.beginPath(); ctx.moveTo(10, py(gp)); ctx.lineTo(W-10, py(gp)); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(232,70,10,0.6)';
+    ctx.font = '9px -apple-system,sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText('Goal 9:09', W-12, py(gp)-2);
+  }
+
+  // Line
+  ctx.strokeStyle = 'rgba(59,130,246,0.8)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < points.length; i++) {
+    const p = points[i];
+    const y = Math.max(2, Math.min(H-2, py(p.sec)));
+    if (i===0) ctx.moveTo(px(p.wi), y);
+    else ctx.lineTo(px(p.wi), y);
+  }
+  ctx.stroke();
+
+  // Dots
+  for (const p of points) {
+    const y = Math.max(2, Math.min(H-2, py(p.sec)));
+    ctx.fillStyle = typeColor(p.type);
+    ctx.beginPath(); ctx.arc(px(p.wi), y, 3, 0, Math.PI*2); ctx.fill();
+  }
+}
+
+function renderEnvSummary() {
+  const runs = allLogs().filter(l => l.logged && l.logged.env && l.logged.env.temp !== null);
+  const el = document.getElementById('env-summary');
+  if (!el) return;
+  if (!runs.length) { el.innerHTML = `<div class="empty"><div class="empty-icon">🌡️</div><div class="empty-text">Log runs with weather data</div></div>`; return; }
+
+  const avgTemp = runs.reduce((a,r)=>a+(r.logged.env.temp||0),0)/runs.length;
+  const bestRun = runs.reduce((best, r) => {
+    if (!r.logged.pace) return best;
+    if (!best) return r;
+    return msToSec(r.logged.pace) < msToSec(best.logged.pace) ? r : best;
+  }, null);
+
+  el.innerHTML = `
+    <div class="env-row"><span class="env-factor">Avg Running Temp</span><span class="env-val">${avgTemp.toFixed(0)}°F</span></div>
+    ${bestRun ? `<div class="env-row"><span class="env-factor">Best Pace Conditions</span><span class="env-val">${bestRun.logged.env.temp}°F · UV ${bestRun.logged.env.uv||'—'} · ${bestRun.logged.env.tod||'—'}</span></div>` : ''}
+    <div class="env-row"><span class="env-factor">Runs with env data</span><span class="env-val">${runs.length}</span></div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════
+let currentModalDate = null;
+let modalState = {};
+
+// openDayModal: see completion block below
+
+function buildModalForm(day) {
+  const logged = day.logged;
+  const isGym = day.type === 'gym';
+  const isRest = day.type === 'rest';
+
+  if (isRest) {
+    return `
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-size:40px;margin-bottom:12px">💤</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:8px">Rest Day</div>
+        <div style="font-size:13px;color:var(--txt2);line-height:1.5">${day.planned.note}</div>
+        ${logged ? `<div style="margin-top:16px;padding:12px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:10px;font-size:13px;color:var(--green)">✓ Rest day completed</div>` : ''}
+        <button class="save-btn" style="margin-top:16px" onclick="saveLog({done:true,rest:true})">${logged ? 'Already Logged ✓' : 'Mark Rest Day Done'}</button>
+      </div>`;
+  }
+
+  if (isGym) {
+    return `
+      <div style="margin-bottom:20px">
+        <div style="font-size:13px;color:var(--txt2);line-height:1.5;margin-bottom:16px"><strong style="color:var(--blue)">${day.planned.note}</strong><br>See the Strength tab for your workout prescription.</div>
+        <div class="form-section">
+          <span class="form-label">Session Notes (optional)</span>
+          <textarea class="finput" id="gym-notes" rows="3" placeholder="Exercises completed, weights, how it felt..." style="resize:none;line-height:1.4">${logged&&logged.notes||''}</textarea>
+        </div>
+        ${buildPainSection(logged)}
+      </div>
+      <button class="save-btn" onclick="saveGymLog()">Save Gym Session</button>`;
+  }
+
+  // Run form
+  const p = day.planned;
+  const l = logged || {};
+  return `
+    <div style="background:var(--bg2);border:1px solid var(--sep);border-radius:12px;padding:12px;margin-bottom:18px;display:flex;gap:12px;align-items:center">
+      <span class="type-tag ${day.type}">${day.type}</span>
+      <div style="font-size:12px;color:var(--txt2)">${p.dist?p.dist+' mi · ':''} ${p.pace?'~'+p.pace+'/mi · ':''} RPE ${p.rpe||'—'}</div>
+    </div>
+    ${p.note?`<div class="note-pill" style="margin-bottom:16px">${p.note}</div>`:''}
+
+    <div class="form-section">
+      <span class="form-label">Distance & Time</span>
+      <div class="form-row">
+        <div class="fgroup"><label class="form-label">Miles</label><input type="number" class="finput" id="log-dist" placeholder="${p.dist||'0.0'}" step="0.01" min="0" value="${l.dist||''}"></div>
+        <div class="fgroup"><label class="form-label">Duration (h:mm:ss)</label><input type="text" class="finput" id="log-dur" placeholder="0:00:00" value="${l.duration||''}"></div>
+      </div>
+      <div style="margin-top:8px;padding:8px 12px;background:var(--bg2);border-radius:8px;font-size:12px;color:var(--txt2)">Pace: <span id="pace-calc" style="font-weight:700;font-family:'SF Mono',monospace;color:var(--txt)">${l.pace||'—'}</span>/mi</div>
+    </div>
+
+    <div class="form-section">
+      <span class="form-label">Perceived Effort (RPE)</span>
+      <div class="rpe-row" id="rpe-row">
+        ${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button class="rpe-btn${l.rpe===n?' sel':''}" data-rpe="${n}" onclick="selectRPE(${n})">${n}</button>`).join('')}
+      </div>
+      <div style="margin-top:6px;font-size:11px;color:var(--txt3)">1=very easy · 5=moderate · 7=hard · 9=max effort · 10=all-out</div>
+    </div>
+
+    <div class="form-section">
+      <span class="form-label">Environmental Conditions</span>
+      <div class="form-row three">
+        <div class="fgroup"><label class="form-label">Temp (°F)</label><input type="number" class="finput" id="log-temp" placeholder="65" value="${l.env&&l.env.temp!==undefined?l.env.temp:''}" onchange="updateEnvCalc()"></div>
+        <div class="fgroup"><label class="form-label">UV Index</label><input type="number" class="finput" id="log-uv" placeholder="3" min="0" max="11" value="${l.env&&l.env.uv!==undefined?l.env.uv:''}" onchange="updateEnvCalc()"></div>
+        <div class="fgroup"><label class="form-label">Time of Day</label>
+          <select class="finput" id="log-tod" onchange="updateEnvCalc()">
+            <option value="">Select</option>
+            ${['morning','midday','afternoon','evening'].map(v=>`<option value="${v}"${l.env&&l.env.tod===v?' selected':''}>${v.charAt(0).toUpperCase()+v.slice(1)}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="fgroup" style="margin-top:10px"><label class="form-label">Conditions</label>
+        <select class="finput" id="log-cond" onchange="updateEnvCalc()">
+          <option value="">Normal</option>
+          <option value="humid"${l.env&&l.env.cond==='humid'?' selected':''}>Humid</option>
+          <option value="wind_head"${l.env&&l.env.cond==='wind_head'?' selected':''}>Headwind</option>
+          <option value="wind_tail"${l.env&&l.env.cond==='wind_tail'?' selected':''}>Tailwind</option>
+          <option value="rain"${l.env&&l.env.cond==='rain'?' selected':''}>Rain</option>
+        </select>
+      </div>
+      <div id="env-impact-result"></div>
+    </div>
+
+    ${buildPainSection(logged)}
+
+    <div class="form-section">
+      <span class="form-label">Notes</span>
+      <textarea class="finput" id="log-notes" rows="3" placeholder="How did it feel? What went well?" style="resize:none;line-height:1.4">${l.notes||''}</textarea>
+    </div>
+
+    <button class="save-btn" onclick="saveRunLog()">Save Run</button>
+  `;
+}
+
+function buildPainSection(logged) {
+  const l = logged || {};
+  const pain = l.pain || {};
+  return `
+    <div class="form-section">
+      <span class="form-label">Pain Check — Body Areas</span>
+      <div class="pain-areas" id="pain-areas">
+        ${Object.entries(PAIN_DB).map(([k,v])=>`<button class="pa-btn${pain.areas&&pain.areas.includes(k)?' sel':''}" data-area="${k}" onclick="togglePainArea('${k}')">${v.label}</button>`).join('')}
+      </div>
+      <div style="margin-top:10px">
+        <span class="form-label">Pain Scale (0=none · 10=severe)</span>
+        <div class="pain-scale" id="pain-scale">
+          ${[0,1,2,3,4,5,6,7,8,9,10].map(n=>{
+            const c = n<=3?'rgba(34,197,94,0.7)':n<=6?'var(--gold)':'var(--red)';
+            return `<button class="ps-btn${pain.scale===n?' sel':''}" data-scale="${n}" onclick="selectPainScale(${n})" style="${pain.scale===n?`background:${c};border-color:${c}`:''}">
+              ${n}
+            </button>`;
+          }).join('')}
+        </div>
+      </div>
+      <div id="pain-recs-container"></div>
+    </div>`;
+}
+
+function bindModalEvents() {
+  // Pace calculator
+  const distEl = document.getElementById('log-dist');
+  const durEl = document.getElementById('log-dur');
+  if (distEl && durEl) {
+    [distEl, durEl].forEach(el => el.addEventListener('input', calcPace));
+  }
+}
+
+function calcPace() {
+  const dist = parseFloat(document.getElementById('log-dist')?.value);
+  const durStr = document.getElementById('log-dur')?.value;
+  const el = document.getElementById('pace-calc');
+  if (!el) return;
+  if (!dist || !durStr) { el.textContent = '—'; return; }
+  const durSec = hmsToSec(durStr);
+  if (!durSec || !dist) { el.textContent = '—'; return; }
+  const paceSec = Math.round(durSec / dist);
+  el.textContent = secToMS(paceSec);
+  modalState.calcPace = secToMS(paceSec);
+}
+
+let selectedRPE = null;
+let selectedPainAreas = [];
+let selectedPainScale = null;
+
+function openDayModalInit() {
+  selectedRPE = null; selectedPainAreas = []; selectedPainScale = null;
+}
+
+function selectRPE(n) {
+  selectedRPE = n;
+  document.querySelectorAll('.rpe-btn').forEach(b => {
+    b.classList.toggle('sel', parseInt(b.dataset.rpe)===n);
+  });
+}
+
+function togglePainArea(area) {
+  const idx = selectedPainAreas.indexOf(area);
+  if (idx >= 0) selectedPainAreas.splice(idx, 1);
+  else selectedPainAreas.push(area);
+  document.querySelectorAll('.pa-btn').forEach(b => {
+    b.classList.toggle('sel', selectedPainAreas.includes(b.dataset.area));
+  });
+  renderPainRecs();
+}
+
+function selectPainScale(n) {
+  selectedPainScale = n;
+  document.querySelectorAll('.ps-btn').forEach(b => {
+    const isThis = parseInt(b.dataset.scale)===n;
+    const c = n<=3?'rgba(34,197,94,0.7)':n<=6?'var(--gold)':'var(--red)';
+    b.classList.toggle('sel', isThis);
+    b.style.background = isThis ? c : '';
+    b.style.borderColor = isThis ? c : '';
+  });
+  renderPainRecs();
+}
+
+function renderPainRecs() {
+  const cont = document.getElementById('pain-recs-container');
+  if (!cont) return;
+
+  // High pain warning
+  if (selectedPainScale !== null && selectedPainScale >= 7) {
+    cont.innerHTML = `<div class="rest-warning">
+      <div class="rest-warning-icon">⚠️</div>
+      <div class="rest-warning-text">Pain Scale ${selectedPainScale}/10 — Rest Required</div>
+      <div class="rest-warning-sub">Do not run through this. Take 2–3 full rest days. If pain persists, see a medical professional.</div>
+    </div>`;
+    return;
+  }
+
+  if (!selectedPainAreas.length) { cont.innerHTML = ''; return; }
+
+  const recs = selectedPainAreas.flatMap(a => PAIN_DB[a] ? [{area:a, ...PAIN_DB[a]}] : []);
+  if (!recs.length) { cont.innerHTML = ''; return; }
+
+  let html = `<div class="pain-recs"><div class="pain-recs-title">🎯 Recommended Work · ${recs.map(r=>r.label).join(', ')}</div>`;
+  for (const r of recs) {
+    html += `<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--red);margin-bottom:4px">${r.label}</div>`;
+    for (const ex of r.exercises) html += `<div class="pain-rec-item">${ex}</div>`;
+    html += `<div class="pain-note">${r.note}</div></div>`;
+  }
+  html += '</div>';
+  cont.innerHTML = html;
+}
+
+function updateEnvCalc() {
+  const temp = parseFloat(document.getElementById('log-temp')?.value);
+  const uv   = parseFloat(document.getElementById('log-uv')?.value);
+  const tod  = document.getElementById('log-tod')?.value;
+  const cond = document.getElementById('log-cond')?.value;
+  const el   = document.getElementById('env-impact-result');
+  if (!el || isNaN(temp)) { if(el)el.innerHTML=''; return; }
+
+  const imp = calcEnvImpact(temp, uv, tod, cond);
+  if (!imp || imp.total === 0) { el.innerHTML=''; return; }
+
+  el.innerHTML = `<div class="env-result">
+    <div class="env-result-title">Environmental Impact</div>
+    ${imp.tempImp>0?`<div class="env-row"><span class="env-factor">Temperature (${temp}°F)</span><span class="env-val neg">+${imp.tempImp}s/mi</span></div>`:''}
+    ${imp.uvImp>0?`<div class="env-row"><span class="env-factor">UV / Sun Load</span><span class="env-val neg">+${imp.uvImp}s/mi</span></div>`:''}
+    ${imp.todImp>0?`<div class="env-row"><span class="env-factor">Time of Day</span><span class="env-val neg">+${imp.todImp}s/mi</span></div>`:''}
+    ${imp.humImp>0?`<div class="env-row"><span class="env-factor">Conditions</span><span class="env-val neg">+${imp.humImp}s/mi</span></div>`:''}
+    <div class="env-row env-total"><span class="env-factor" style="font-weight:700">Total Drag</span><span class="env-val neg" style="font-size:14px">+${imp.total}s/mi</span></div>
+    <div class="env-verdict">${imp.verdict}</div>
+  </div>`;
+}
+
+function saveRunLog() {
+  const found = findDay(currentModalDate);
+  if (!found) return;
+  const day = found.day;
+
+  const dist = parseFloat(document.getElementById('log-dist')?.value) || null;
+  const durStr = document.getElementById('log-dur')?.value || null;
+  const durSec = durStr ? hmsToSec(durStr) : null;
+  const pace = (dist && durSec) ? secToMS(Math.round(durSec/dist)) : (modalState.calcPace || null);
+  const notes = document.getElementById('log-notes')?.value || '';
+
+  const temp = parseFloat(document.getElementById('log-temp')?.value);
+  const uv   = parseFloat(document.getElementById('log-uv')?.value);
+  const tod  = document.getElementById('log-tod')?.value;
+  const cond = document.getElementById('log-cond')?.value;
+
+  const envImp = (!isNaN(temp)) ? calcEnvImpact(temp, uv, tod, cond) : null;
+
+  day.logged = {
+    done: true,
+    dist: dist,
+    duration: durStr,
+    pace: pace,
+    rpe: selectedRPE,
+    notes,
+    env: { temp: isNaN(temp)?null:temp, uv:isNaN(uv)?null:uv, tod:tod||null, cond:cond||null },
+    envImpact: envImp,
+    pain: {
+      areas: [...selectedPainAreas],
+      scale: selectedPainScale,
+    },
+    loggedAt: new Date().toISOString(),
+  };
+
+  // Update adaptive paces for future easy/long runs
+  if (pace) adaptFuturePaces(currentModalDate, msToSec(pace), dist, selectedRPE);
+
+  saveState();
+  closeModal();
+  refreshAll();
+}
+
+function saveGymLog() {
+  const found = findDay(currentModalDate);
+  if (!found) return;
+  const notes = document.getElementById('gym-notes')?.value || '';
+  found.day.logged = {
+    done:true, type:'gym', notes,
+    pain:{areas:[...selectedPainAreas], scale:selectedPainScale},
+    loggedAt: new Date().toISOString(),
+  };
+  saveState();
+  closeModal();
+  refreshAll();
+}
+
+function saveLog(data) {
+  const found = findDay(currentModalDate);
+  if (!found) return;
+  found.day.logged = { ...data, loggedAt: new Date().toISOString() };
+  saveState();
+  closeModal();
+  refreshAll();
+}
+
+// ═══════════════════════════════════════════════════════
+// ADAPTIVE PACING
+// ═══════════════════════════════════════════════════════
+function adaptFuturePaces(fromDate, loggedPaceSec, dist, rpe) {
+  if (!loggedPaceSec || !dist) return;
+  // Predict easy pace from logged effort
+  // If RPE was 7 and dist >= 3, this is meaningful data
+  if ((rpe || 6) < 4 && dist < 2) return; // too short/easy to be meaningful
+
+  const rpeAdj = Math.max(0, (8 - (rpe||6)) * 0.03); // adjust for effort level
+  const easyPaceSec = Math.round(loggedPaceSec * (1 + rpeAdj));
+
+  let updated = 0;
+  for (const w of ST.plan.weeks) {
+    for (const d of w.days) {
+      if (d.date > fromDate && !d.logged && (d.type === 'easy' || d.type === 'long') && d.planned.pace) {
+        // Only adjust if the prediction is significantly different
+        const currentPred = msToSec(d.planned.pace);
+        const newPace = d.type === 'long' ? easyPaceSec + 55 : easyPaceSec + 20;
+        // Blend: 30% new data, 70% planned
+        const blended = Math.round(currentPred * 0.7 + newPace * 0.3);
+        d.planned.pace = secToMS(blended);
+        if (++updated >= 30) return; // only adapt next 30 days
+      }
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════
+function updateRaceDate() {
+  const val = document.getElementById('new-race-date')?.value;
+  if (!val) return;
+  const newPlan = generatePlan(ST.plan.startDate, val);
+  // Merge in existing logs
+  for (const w of newPlan.weeks) for (const d of w.days) {
+    const existing = findDay(d.date);
+    if (existing && existing.day.logged) d.logged = existing.day.logged;
+  }
+  ST.plan = newPlan;
+  saveState();
+  refreshAll();
+  renderSettings();
+  alert('Program updated! All logged data preserved.');
+}
+
+function confirmReset() {
+  if (confirm('Reset all logged run and gym data? Your plan structure is preserved.')) {
+    for (const w of ST.plan.weeks) for (const d of w.days) d.logged = null;
+    saveState();
+    refreshAll();
+  }
+}
+
+function renderSettings() {
+  const raceD = new Date(ST.plan.raceDate + 'T00:00:00');
+  const startD = new Date(ST.plan.startDate + 'T00:00:00');
+  document.getElementById('set-race-date').textContent = raceD.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('set-start-date').textContent = startD.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('set-total-weeks').textContent = ST.plan.weeks.length;
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  currentModalDate = null;
+  selectedRPE = null;
+  selectedPainAreas = [];
+  selectedPainScale = null;
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+let activeTab = 'dash';
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.screen').forEach(s => {
+    const id = s.id.replace('screen-', '');
+    s.classList.toggle('active', id === tab);
+  });
+  if (tab === 'dash') { renderDashboard(); }
+  if (tab === 'cal') renderCalendar();
+  if (tab === 'strength') renderStrength();
+  if (tab === 'stats') renderAnalytics();
+  if (tab === 'settings') renderSettings();
+}
+
+// ═══════════════════════════════════════════════════════
+// FULL REFRESH
+// ═══════════════════════════════════════════════════════
+function renderDashboard() {
+  renderHeader();
+  renderProgressChart();
+  renderWeekStrip();
+}
+
+function refreshAll() {
+  renderHeader();
+  if (activeTab === 'dash') renderDashboard();
+  if (activeTab === 'cal') renderCalendar();
+  if (activeTab === 'stats') renderAnalytics();
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => switchTab(t.dataset.tab));
+});
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+
+window.addEventListener('resize', () => {
+  if (activeTab === 'dash') renderProgressChart();
+  if (activeTab === 'stats') renderAnalytics();
+});
+
+loadState();
+renderDashboard();
+
+
+// ═══════════════════════════════════════════════════════
+// MODAL STATE INIT FROM EXISTING LOG
+// ═══════════════════════════════════════════════════════
+function openDayModal(ds) {
+  // Reset interaction state
+  selectedRPE = null;
+  selectedPainAreas = [];
+  selectedPainScale = null;
+  // Pre-populate from existing log if present
+  const found = findDay(ds);
+  if (found && found.day.logged) {
+    const l = found.day.logged;
+    if (l.rpe) selectedRPE = l.rpe;
+    if (l.pain && l.pain.areas) selectedPainAreas = [...l.pain.areas];
+    if (l.pain && l.pain.scale !== undefined && l.pain.scale !== null) selectedPainScale = l.pain.scale;
+  }
+  currentModalDate = ds;
+  if (!found) return;
+  const {week, day} = found;
+  const isGym = day.type === 'gym';
+  const isRest = day.type === 'rest';
+  document.getElementById('modal-title').textContent = isGym ? 'Log Gym Session' : isRest ? 'Rest Day' : 'Log Run';
+  document.getElementById('modal-sub').textContent = fmtDateLong(day.date) + ' · Week ' + week.weekNum + ' · ' + day.type.charAt(0).toUpperCase() + day.type.slice(1);
+  document.getElementById('modal-body').innerHTML = buildModalForm(day);
+  document.getElementById('modal-overlay').classList.add('open');
+  bindModalEvents();
+  // Re-render pain recs if areas are pre-loaded
+  if (selectedPainAreas.length) renderPainRecs();
+  // Re-render env if data is pre-loaded
+  if (found.day.logged && found.day.logged.env && found.day.logged.env.temp !== null) updateEnvCalc();
+}
+
+// ═══════════════════════════════════════════════════════
+// CALENDAR: SCROLL TO CURRENT WEEK
+// ═══════════════════════════════════════════════════════
+function scrollToCurrentWeek() {
+  requestAnimationFrame(() => {
+    const calEl = document.getElementById('cal-content');
+    if (!calEl) return;
+    const current = calEl.querySelector('.current-week');
+    if (current) {
+      const top = current.getBoundingClientRect().top + window.scrollY - 160;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// PHASE PROGRESS BAR
+// ═══════════════════════════════════════════════════════
+function renderPhaseBar() {
+  const wi = currentWeekIndex();
+  const week = ST.plan.weeks[wi];
+  // Count weeks in same phase
+  const phaseWeeks = ST.plan.weeks.filter(w => w.phase === week.phase);
+  const phaseIdx = phaseWeeks.findIndex(w => w.weekNum === week.weekNum);
+  const pct = Math.round((phaseIdx + 1) / phaseWeeks.length * 100);
+  let bar = document.getElementById('phase-bar-fill');
+  if (!bar) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'phase-bar';
+    wrapper.innerHTML = '<div class="phase-fill" id="phase-bar-fill" style="width:0%"></div>';
+    const dashEl = document.getElementById('screen-dash');
+    if (dashEl) dashEl.prepend(wrapper);
+    bar = document.getElementById('phase-bar-fill');
+  }
+  if (bar) bar.style.width = pct + '%';
+}
+
+// ═══════════════════════════════════════════════════════
+// AUGMENT TAB BEHAVIOR (scroll + phase bar)
+// ═══════════════════════════════════════════════════════
+// Wrap onclick at element level — avoids duplicate function declarations
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => {
+    const tab = t.dataset.tab;
+    switchTab(tab);
+    if (tab === 'cal') scrollToCurrentWeek();
+    if (tab === 'dash') renderPhaseBar();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+});
+
+// ═══════════════════════════════════════════════════════
+// KEYBOARD: CLOSE MODAL ON ESC
+// ═══════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ═══════════════════════════════════════════════════════
+// ICON GENERATOR FOR HOME SCREEN
+// ═══════════════════════════════════════════════════════
+(function(){
+  try {
+    const c = document.createElement('canvas');
+    c.width = c.height = 180;
+    const x = c.getContext('2d');
+    x.fillStyle = '#07070D'; x.fillRect(0,0,180,180);
+    x.strokeStyle = '#E8460A'; x.lineWidth = 5;
+    x.beginPath(); x.arc(90,90,72,0,Math.PI*2); x.stroke();
+    x.fillStyle = '#E8460A';
+    x.font = 'bold 22px -apple-system,sans-serif';
+    x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText('RUNJAWN', 90, 90);
+    const link = document.createElement('link');
+    link.rel = 'apple-touch-icon'; link.href = c.toDataURL();
+    document.head.appendChild(link);
+  } catch(e){}
+})();
+
+// ═══════════════════════════════════════════════════════
+// STARTUP
+// ═══════════════════════════════════════════════════════
+renderPhaseBar();
+</script>
+</body>
+</html>
